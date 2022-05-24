@@ -50,8 +50,7 @@ const userSchema = new mongoose.Schema({
             },
             pincode: {
                 type: Number,
-                required: true,
-                max: 6
+                required: true
             }
         },
         billing: {
@@ -67,8 +66,7 @@ const userSchema = new mongoose.Schema({
             },
             pincode: {
                 type: Number,
-                required: true,
-                max: 6
+                required: true
             }
         }
     }
