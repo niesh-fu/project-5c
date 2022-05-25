@@ -6,8 +6,9 @@ const authentication = async function (req, res, next) {
     try {
         // token sent in request header 'authorization'
         let tokenWithBearer = req.headers["authorization"];
-
+        //split values if there is any space between & saved as array form  
         let tokenArray = tokenWithBearer.split(" ");
+        //accessing the 2nd postion element by using index[1]
         let token = tokenArray[1];
 
         // if token is not provided
