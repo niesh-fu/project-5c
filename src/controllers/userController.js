@@ -9,10 +9,9 @@ const bcrypt = require('bcrypt');
 
 const registerUser = async function (req, res) {
     try {
-        let files = req.files //Getting user profileImage  
 
-
-        let requestBody = req.body // Getting other details of user
+        const files = req.files //Getting user profileImage  
+        const requestBody = req.body // Getting other details of user
 
         // Validation of Request Body
         if (!isValidRequestBody(requestBody)) {
@@ -57,8 +56,9 @@ const registerUser = async function (req, res) {
         }
 
         //Encrypting Password by Bcrypt package
-        requestBody.password = await bcrypt.hashSync(password, 10);
-    
+        const salt = await bcrypt.genSalt(10);
+        requestBody.password = await bcrypt.hash(password, salt);
+
         if (!isValidAddress(address)) {
             return res.status(400).send({ status: false, message: "address is required" });
         }
@@ -99,9 +99,11 @@ const registerUser = async function (req, res) {
             return res.status(400).send({ status: false, message: "please use a valid pincode in billing address!" });
         }
 
+        //if request files array is empty
         if (!(files && files.length > 0)) {
             return res.status(400).send({ status: false, message: "image is required" });
         }
+
         //--------------------------------------Validation Ends----------------------------------//
 
         requestBody.profileImage = await uploadFile(files[0]);  //profileImage uploaded to AWS S3 Bucket
