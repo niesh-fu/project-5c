@@ -146,7 +146,7 @@ const loginUser = async function (req, res) {
 
         // Checking User exists or not
         if (!user) {
-            return res.status(401).send({ status: false, message: "email or password is not matched!" });
+            return res.status(401).send({ status: false, message: "The email address you entered isn't connected to an account. Register a new user first." });
         }
 
         //Decrypt password by Bcrypt and Compare the password with password from request body
@@ -213,25 +213,24 @@ const updateUserProfile = async function (req, res) {
 
         // user details (to be updated) sent through request body
         const formBody = req.body;
-        let bodyFromReq = JSON.parse(JSON.stringify(formBody));
+        const bodyFromReq = JSON.parse(JSON.stringify(formBody));
 
         // if request body is empty
         if (!isValidRequestBody(bodyFromReq)) {
             return res.status(400).send({ status: false, message: "Please provide user details to update!" });
         }
+        // declaring a new emapty object to holds the all values in it
+        let upadteFields = {};
 
         // files send through form in req.files
         const files = req.files;
         // if there is any file it will be update
         if (files && files.length > 0) {
-            bodyFromReq.profileImage = await uploadFile(files[0]);
+            upadteFields["profileImage"] = await uploadFile(files[0]);
         }
 
         // update fields sent through request body
         const { fname, lname, email, phone, password, address } = bodyFromReq;
-
-        // declaring a new emapty object to holds the all values in it
-        let upadteFields = {};
 
         //--------------------------------------Validation Starts----------------------------------//
 
