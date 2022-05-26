@@ -2,15 +2,21 @@ const express = require("express");
 const router = express.Router();
 
 const userController = require("../controllers/userController");
+const productController = require("../controllers/productController");
+
 const middleware = require("../middlewares/auth");
 
-router.post("/register",userController.registerUser);
+router.post("/register", userController.registerUser);
 
-router.post("/login",userController.loginUser);
+router.post("/login", userController.loginUser);
 
-router.get("/user/:userId/profile",middleware.authentication,userController.getUserProfile);
+router.get("/user/:userId/profile", middleware.authentication, userController.getUserProfile);
 
-router.put("/user/:userId/profile",middleware.authentication,userController.updateUserProfile);
+router.put("/user/:userId/profile", middleware.authentication, userController.updateUserProfile);
+
+//===================================================================================================================
+
+router.post("/products", productController.createProduct)
 
 // if api is invalid OR wrong URL
 router.all("/*", function (req, res) {

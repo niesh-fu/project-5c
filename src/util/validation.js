@@ -66,6 +66,11 @@ const isValidName = function (value) {
     return pattern.test(value);
 };
 
+const isValidPrice = function(price){
+    const pattern = /^\d+(,\d{3})*(\.\d{1,2})?$/;
+    return pattern.test(price);
+}
+
 
 
 module.exports = {
@@ -79,4 +84,5 @@ module.exports = {
     isValidPassword,
     isValidObjectId,
     isValidName,
+    isValidPrice
 };

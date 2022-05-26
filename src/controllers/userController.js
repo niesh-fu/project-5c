@@ -1,10 +1,8 @@
 const userModel = require('../models/userModel')
 const jwt = require('jsonwebtoken')
-const mongoose = require('mongoose')
 const { isValidRequestBody, isValidAddress, isValid, isValidEmail, isValidPhone, isValidURL, isValidPincode, isValidPassword, isValidObjectId, isValidName } = require('../util/validation')
 const { uploadFile } = require('../util/awsConnection')
 const bcrypt = require('bcrypt');
-const { findOne } = require('../models/userModel')
 
 //==============================================================================================================================
 
@@ -16,7 +14,7 @@ const registerUser = async function (req, res) {
 
         // Validation of Request Body
         if (!isValidRequestBody(requestBody)) {
-            return res.status(400).send({ status: false, message: "Invalid request parameter, please provide user Detaills" })
+            return res.status(400).send({ status: false, message: "Invalid request parameter, please provide user Details" })
         }
 
         // Extract body by destructuring
@@ -212,8 +210,7 @@ const updateUserProfile = async function (req, res) {
         }
 
         // user details (to be updated) sent through request body
-        const formBody = req.body;
-        const bodyFromReq = JSON.parse(JSON.stringify(formBody));
+        const bodyFromReq = JSON.parse(JSON.stringify(req.body));
 
         // if request body is empty
         if (!isValidRequestBody(bodyFromReq)) {
