@@ -298,7 +298,7 @@ const updateProduct = async function (req, res) {
               
           }
 
-        if (validator.isValid(installments)) {
+        if (isValid(installments)) {
             if (!(!isNaN(Number(installments)))) {
                 return res.status(400).send({ status: false, message: `Installments should be a valid number` })
             }
@@ -309,7 +309,7 @@ const updateProduct = async function (req, res) {
 
 
         if (productImage && !productImage.length == 0) {   //Undefined.length will not work in JS
-            if (!validator.isValidRequestBody(productImage)) {
+            if (!isValidRequestBody(productImage)) {
                 return res.status(400).send({ status: false, msg: "Invalid request parameters. Provide productImage." });
             }
             const downloadUrl = await awsFile.uploadFile(productImage[0]);
