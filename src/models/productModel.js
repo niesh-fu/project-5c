@@ -2,56 +2,59 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
 
-        title: {
-            type: String, 
-            required: true,
-            unique: true
-            },
+    title: {
+        type: String,
+        required: true,
+        unique: true
+    },
 
-        description: {
-            type: String, 
-            required: true
-        },
+    description: {
+        type: String,
+        required: true
+    },
 
-        price: {
-            type: Number, 
-            required: true
-        },
+    price: {
+        type: Number,
+        required: true
+    },
 
-        currencyId: {
+    currencyId: {
+        type: String,
+        required: true
+    },
+    currencyFormat: {
+        type: String,
+        required: true,
+    },
+
+    isFreeShipping: {
+        type: Boolean,
+        default: false
+    },
+
+    productImage: {
+        type: String,
+        required: true
+    },  // s3 link
+
+    style: { type: String },
+
+    availableSizes: {
+        type: [{
             type: String,
-            required: true
-        },
-        currencyFormat: {
-            type: String, 
-            required: true, 
-        },
+            enum: ["S", "XS", "M", "X", "L", "XXL", "XL"]
+        }]
+        , required: true
+    },
 
-        isFreeShipping: {
-            type: Boolean, 
-            default: false
-        },
 
-        productImage: {
-            type: String, 
-            required: true
-        },  // s3 link
 
-        style: {type: String},
+    installments: { type: Number },
 
-        availableSizes: {
-            type: String,
-            required: true,
-            trim: true,
-            enum: ["S", "XS","M","X", "L","XXL", "XL"]
-        },
+    deletedAt: { type: Date },
 
-        installments: {type: Number},
+    isDeleted: { type: Boolean, default: false }
 
-        deletedAt: {type: Date},
-
-        isDeleted: {type: Boolean, default: false}
-
-      }, { timestamps: true });
+}, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema)

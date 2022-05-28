@@ -100,7 +100,7 @@ const registerUser = async function (req, res) {
 
         //if request files array is empty
         if (!(files && files.length > 0)) {
-            return res.status(400).send({ status: false, message: "image is required" });
+            return res.status(400).send({ status: false, message: "Profile image is required in files" });
         }
 
         //--------------------------------------Validation Ends----------------------------------//
@@ -177,6 +177,11 @@ const getUserProfile = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please Provide valid userId" })
         }
 
+        //compare decodedToken-[req.userId] with params userId
+        if (userId != req.userId) {
+            return res.status(403).send({ status: false, message: "unauthorized access!" });
+        }
+
         const userDetails = await userModel.findById({ _id: userId })
         if (!userDetails) {
             return res.status(404).send({ status: false, message: "No such User Exists" })
@@ -204,6 +209,7 @@ const updateUserProfile = async function (req, res) {
         if (!isUserPresent) {
             return res.status(404).send({ status: false, message: "user not found!" });
         }
+
         //compare decodedToken-[req.userId] with params userId
         if (userId != req.userId) {
             return res.status(403).send({ status: false, message: "unauthorized access!" });
