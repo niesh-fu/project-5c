@@ -70,7 +70,9 @@ const isValidPrice = function(price){
     const pattern = /^\d+(,\d{3})*(\.\d{1,2})?$/;
     return pattern.test(price);
 }
-
+const isValidInteger = function isInteger(value) {
+    return value % 1 == 0;
+}
 
 
 module.exports = {
@@ -84,5 +86,6 @@ module.exports = {
     isValidPassword,
     isValidObjectId,
     isValidName,
-    isValidPrice
+    isValidPrice,
+    isValidInteger
 };

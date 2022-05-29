@@ -1,5 +1,5 @@
 const productModel = require('../models/productModel');
-const { isValidRequestBody, isValid, isValidName, isValidPrice } = require('../util/validation')
+const { isValidRequestBody, isValid, isValidObjectId, isValidPrice } = require('../util/validation')
 const { uploadFile } = require('../util/awsConnection')
 
 const createProduct = async function (req, res) {
@@ -330,27 +330,36 @@ const updateProduct = async function (req, res) {
 
 const deleteProductById = async function (req, res) {
     try {
+        const params = req.params.productId; //accessing theproductId from the params.
 
-        const productId = req.params.productId
-        if (!isValidObjectId(productId)) {
-            return res.status(400).send({ status: false, message: "Please provide valid productId" })
+        //validation for the invalid params.
+        if (!isValidObjectId(params)) {
+            return res.status(400).send({ status: false, message: "InavlidproductId." })
         }
 
-        const product = await productModel.findOne({ _id: productId, isDeleted: false })
-        if (!product) {
-            return res.status(404).send({ status: false, message: "No such product exists" })
+        //finding the product in DB which the user wants to delete.
+        const findProduct = await productModel.findById({ _id: params })
+
+        if (!findProduct) {
+            return res.status(404).send({ status: false, message: `No book found by ${params}` })
         }
-
-        if (product.isDeleted === true) {
-            return res.status(404).send({ status: false, message: "No such product exists" })
+        //Authorizing the user -> if the user doesn't created the book, He/she won't be able to delete it.
+        else if (findProduct.userId != req.userId) {
+            return res.status(401).send({
+                status: false,
+                message: "Unauthorized access."
+            })
         }
-
-        await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } })
-        res.status(200).send({ status: true, message: 'Successfully deleted' })
-
+        //if the attribute isDeleted:true , then it is already deleted.
+        else if (findProduct.isDeleted == true) {
+            return res.status(400).send({ status: false, message: `Product has been already deleted.` })
+        } else {
+            //if attribute isDeleted:false, then change the isDeleted flag to true, and remove all the reviews of the book as well.
+            const deleteData = await productModel.findOneAndUpdate({ _id: { $in: findProduct } }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true }).select({ _id: 1, title: 1, isDeleted: 1, deletedAt: 1 })
+            return res.status(200).send({ status: true, message: "Product deleted successfullly.", data: deleteData })
+        }
     } catch (err) {
-        res.status(500).send({ status: false, msg: err.message });
+        return res.status(500).send({ status: false, Error: err.message })
     }
 }
-
-module.exports = { createProduct, getProductById, updateProduct, deleteProductById }
+module.exports = { createProduct, getProductById, updateProduct, deleteProductById,getProductByFilter }
