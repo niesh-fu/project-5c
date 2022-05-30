@@ -75,7 +75,7 @@ const createCart = async function (req, res) {
             
             for (i in arr) {
                 if (arr[i].productId.toString() === productId) {
-                    arr[i].quantity = arr[i].quantity + quantity
+                arr[i].quantity = parseInt(arr[i].quantity) + parseInt(quantity)
 
                    
                     const updatedCart = {
@@ -186,7 +186,7 @@ const updateCart = async function (req, res) {
         if (isNaN(removeProduct)) {
             return res.status(400).send({ status: false, message: `removeProduct should be a valid number either 0 or 1` })
         }
-        if (!((removeProduct === 0) || (removeProduct === 1))) {
+        if (!((removeProduct == 0) || (removeProduct == 1))) {
             return res.status(400).send({ status: false, message: 'removeProduct should be 0 (product is to be removed) or 1(quantity has to be decremented by 1) ' })
         }
 
