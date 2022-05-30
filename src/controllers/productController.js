@@ -28,7 +28,7 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "description is required" })
         }
 
-        if (isNaN(price) || !isValidPrice(price)) {
+        if (isNaN(price) || price <= 0 || !isValidPrice(price)) {
             return res.status(400).send({ status: false, message: "price is required and it should be valid" })
         }
 
@@ -77,7 +77,7 @@ const createProduct = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please provide product image" })
         }
 
-        let productImage = await uploadFile(files[0]);
+        const productImage = await uploadFile(files[0]);
 
         const productData = {
             title: title, description: description, price: price,
@@ -103,7 +103,7 @@ const getProductByFilter = async function (req, res) {
         let filters = { isDeleted: false }
         let sorting = {};
 
-        const { size, name, priceGreaterThan, priceLessThan, priceSort } = query;
+        let { size, name, priceGreaterThan, priceLessThan, priceSort } = query;
 
 
         if (query.hasOwnProperty('size')) {
@@ -152,9 +152,8 @@ const getProductByFilter = async function (req, res) {
             if (query.hasOwnProperty("priceGreaterThan")) {
                 filters["price"] = { $gt: Number(priceGreaterThan), $lt: Number(priceLessThan) };
             }
-            else{
-
-            filters["price"] = { $lt: Number(priceLessThan) };
+            else {
+                filters["price"] = { $lt: Number(priceLessThan) };
             }
         }
 
@@ -214,15 +213,16 @@ const getProductById = async function (req, res) {
 
 const updateProduct = async function (req, res) {
     try {
-        const requestBody = req.body
-        const productId = req.params.productId
-        const productImage = req.files;
+
+        const requestBody = JSON.parse(JSON.stringify(req.body));
+        const productId = req.params.productId;
+        
 
         if (!isValidObjectId(productId)) {
             return res.status(400).send({ status: false, message: "Invalid productId in params." })
         }
 
-        if (!isValidRequestBody(requestBody) && req.files && req.files.length == 0) {
+        if (!isValidRequestBody(requestBody)) {
             return res.status(400).send({ status: false, message: 'No paramateres passed product unmodified' })
         }
 
@@ -233,95 +233,97 @@ const updateProduct = async function (req, res) {
 
         const { title, description, price, currencyId, isFreeShipping, style, availableSizes, installments } = requestBody;
 
-        const updatedProductData = {}
+        let updatedProductData = {};
 
-        if (isValid(title)) {
+        if (requestBody.hasOwnProperty('title')) {
+            if (!isValid(title)) {
+                return res.status(400).send({ status: false, message: "title should be a valid" })
+            }
+
             const isTitleAlreadyUsed = await productModel.findOne({ title: title });
             if (isTitleAlreadyUsed) {
-                return res.status(400).send({ status: false, message: 'title is already used' })
+                return res.status(400).send({ status: false, message: `${title} title is already used` })
             }
-            if (!updatedProductData.hasOwnProperty['title']) {
-                updatedProductData['title'] = title
-            }
+            updatedProductData['title'] = title;
         }
 
-        if (isValid(description)) {
-            if (!updatedProductData.hasOwnProperty['description']) {
-                updatedProductData['description'] = description
+
+        if (requestBody.hasOwnProperty('description')) {
+            if (!isValid(description)) {
+                return res.status(400).send({ status: false, message: "description should be a valid" })
             }
+            updatedProductData['description'] = description
         }
 
-        if (isValid(price)) {
-            if ((!(!isNaN(Number(price)))) || (price <= 0)) {
-                return res.status(400).send({ status: false, message: `Price should be a valid number` })
+
+        if (requestBody.hasOwnProperty('price')) {
+            if (isNaN(price) || price <= 0 || !isValidPrice(price)) {
+                return res.status(400).send({ status: false, message: "price should be valid and ZERO not acceptable" })
             }
-            if (!updatedProductData.hasOwnProperty['price']) {
-                updatedProductData['price'] = price
-            }
+            updatedProductData['price'] = price
         }
 
-        if (isValid(currencyId)) {
-            if (!(currencyId == "INR")) {
-                return res.status(400).send({ status: false, message: 'currencyId should be INR' })
+
+        if (requestBody.hasOwnProperty('currencyId')) {
+            if (!isValid(currencyId) || currencyId != 'INR') {
+                return res.status(400).send({ status: false, message: 'currencyId should be INR only' })
             }
-            if (!updatedProductData.hasOwnProperty['currencyId']) {
-                updatedProductData['currencyId'] = currencyId
-            }
+            updatedProductData['currencyId'] = currencyId
         }
 
-        if (isValid(isFreeShipping)) {
+
+        if (requestBody.hasOwnProperty('isFreeShipping')) {
             if (!((isFreeShipping === "true") || (isFreeShipping === "false"))) {
                 return res.status(400).send({ status: false, message: 'isFreeShipping should be true or false' })
             }
-            if (!updatedProductData.hasOwnProperty['isFreeShipping']) {
-                updatedProductData['isFreeShipping'] = isFreeShipping
-            }
+            updatedProductData['isFreeShipping'] = isFreeShipping
         }
-        if (isValid(style)) {
-            if (!updatedProductData.hasOwnProperty['style']) {
-                updatedProductData['style'] = style
+
+
+        if (requestBody.hasOwnProperty('style')) {
+            if (!isValid(style)) {
+                return res.status(400).send({ status: false, message: "style should be valid" });
             }
+            updatedProductData['style'] = style
         }
-          if (isValid(availableSizes)) {
+
+
+        if (requestBody.hasOwnProperty('installments')) {
+            if (installments <= 0 || installments % 1 != 0) {
+                return res.status(400).send({ status: false, message: "installments can not be a decimal number " })
+            }
+            updatedProductData['installments'] = installments
+        }
+
+
+        if (requestBody.hasOwnProperty('availableSizes')) {
+            if (!isValid(availableSizes)) {
+                return res.status(400).send({ status: false, message: "Atleast one product size should be give" })
+            }
+
             let AVAILABLE_SIZES = availableSizes.toUpperCase().split(",");  // Creating an array with UPPERCASE values
             if (AVAILABLE_SIZES.length === 0) {
                 return res.status(400).send({ status: false, message: "please provide the product sizes" })
             }
-    
+
             for (let i = 0; i < AVAILABLE_SIZES.length; i++) {
                 if (!(["S", "XS", "M", "X", "L", "XXL", "XL"]).includes(AVAILABLE_SIZES[i])) {
                     return res.status(400).send({ status: false, message: `Sizes should be ${["S", "XS", "M", "X", "L", "XXL", "XL"]} value (with multiple value please give saperated by comma)` })
                 }
             }
 
-            if (!updatedProductData.hasOwnProperty['availableSizes']) {
-                updatedProductData['availableSizes'] = AVAILABLE_SIZES;
-            }
-              
-          }
-
-        if (isValid(installments)) {
-            if (!(!isNaN(Number(installments)))) {
-                return res.status(400).send({ status: false, message: `Installments should be a valid number` })
-            }
-            if (!updatedProductData.hasOwnProperty['installments']) {
-                updatedProductData['installments'] = installments
-            }
+            updatedProductData['availableSizes'] = AVAILABLE_SIZES
         }
 
-
-        if (productImage && !productImage.length == 0) {   //Undefined.length will not work in JS
-            if (!isValidRequestBody(productImage)) {
-                return res.status(400).send({ status: false, msg: "Invalid request parameters. Provide productImage." });
-            }
-            const downloadUrl = await awsFile.uploadFile(productImage[0]);
-            if (!updatedProductData.hasOwnProperty['productImage']) {
-                updatedProductData['productImage'] = downloadUrl
-            }
+        const files = req.files;
+        if ((files && files.length > 0)) {   //Undefined.length will not work in JS
+            const productImage = await uploadFile(files[0]);
+            updatedProductData['productImage'] = productImage
         }
+
 
         const updatedProduct = await productModel.findOneAndUpdate({ _id: productId }, updatedProductData, { new: true })
-        return res.status(200).send({ status: true, message: 'Successfully updated', data: updatedProduct });
+        res.status(200).send({ status: true, message: 'Successfully updated', data: updatedProduct });
 
     } catch (err) {
         return res.status(500).send({ status: false, msg: err.message });
@@ -332,36 +334,31 @@ const updateProduct = async function (req, res) {
 
 const deleteProductById = async function (req, res) {
     try {
-        const params = req.params.productId; //accessing theproductId from the params.
+
+        const productId = req.params.productId; //accessing theproductId from the params.
 
         //validation for the invalid params.
-        if (!isValidObjectId(params)) {
-            return res.status(400).send({ status: false, message: "InavlidproductId." })
+        if (!isValidObjectId(productId)) {
+            return res.status(400).send({ status: false, message: "Inavlid productId." })
         }
 
         //finding the product in DB which the user wants to delete.
-        const findProduct = await productModel.findById({ _id: params })
-
+        const findProduct = await productModel.findById(productId);
         if (!findProduct) {
-            return res.status(404).send({ status: false, message: `No book found by ${params}` })
+            return res.status(404).send({ status: false, message: `No book found by ${productId}` })
         }
-        //Authorizing the user -> if the user doesn't created the book, He/she won't be able to delete it.
-        else if (findProduct.userId != req.userId) {
-            return res.status(401).send({
-                status: false,
-                message: "Unauthorized access."
-            })
-        }
+
         //if the attribute isDeleted:true , then it is already deleted.
-        else if (findProduct.isDeleted == true) {
+        if (findProduct.isDeleted == true) {
             return res.status(400).send({ status: false, message: `Product has been already deleted.` })
-        } else {
-            //if attribute isDeleted:false, then change the isDeleted flag to true, and remove all the reviews of the book as well.
-            const deleteData = await productModel.findOneAndUpdate({ _id: { $in: findProduct } }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true }).select({ _id: 1, title: 1, isDeleted: 1, deletedAt: 1 })
-            return res.status(200).send({ status: true, message: "Product deleted successfullly.", data: deleteData })
         }
+
+        //if attribute isDeleted:false, then change the isDeleted flag to true, and remove all the reviews of the book as well.
+        const deletedProduct = await productModel.findOneAndUpdate({ _id: productId }, { $set: { isDeleted: true, deletedAt: new Date() } }, { new: true }).select({ _id: 1, title: 1, isDeleted: 1, deletedAt: 1 })
+        res.status(200).send({ status: true, message: "Product deleted successfullly.", data: deletedProduct })
+
     } catch (err) {
         return res.status(500).send({ status: false, Error: err.message })
     }
 }
-module.exports = { createProduct, getProductById, updateProduct, deleteProductById,getProductByFilter }
+module.exports = { createProduct, getProductById, updateProduct, deleteProductById, getProductByFilter }
