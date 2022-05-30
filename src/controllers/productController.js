@@ -149,11 +149,13 @@ const getProductByFilter = async function (req, res) {
                 return res.status(400).send({ status: false, message: "Less than price should be valid" })
             }
 
-            if (queryParams.hasOwnProperty("priceGreaterThan")) {
+            if (query.hasOwnProperty("priceGreaterThan")) {
                 filters["price"] = { $gt: Number(priceGreaterThan), $lt: Number(priceLessThan) };
             }
+            else{
 
             filters["price"] = { $lt: Number(priceLessThan) };
+            }
         }
 
 

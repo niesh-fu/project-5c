@@ -54,7 +54,7 @@ const createCart = async function (req, res) {
         }
 
 
-        if (!(!isNaN(Number(quantity)))) {
+        if (isNaN(quantity)) {
             return res.status(400).send({ status: false, message: `Quantity should be a valid number` })
         }
         if (quantity <= 0 || !isValidInteger(quantity)) {
@@ -100,6 +100,7 @@ const createCart = async function (req, res) {
 
             let data = await cartModel.findOneAndUpdate({ _id: isAlredyCartExists._id }, updatedCart, { new: true })
             return res.status(201).send({ status: true, data: data })
+
 
         }
        
@@ -182,7 +183,7 @@ const updateCart = async function (req, res) {
         }
 
         //removeProduct validation
-        if (!(!isNaN(Number(removeProduct)))) {
+        if (isNaN(removeProduct)) {
             return res.status(400).send({ status: false, message: `removeProduct should be a valid number either 0 or 1` })
         }
         if (!((removeProduct === 0) || (removeProduct === 1))) {
