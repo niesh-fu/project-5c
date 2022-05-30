@@ -193,7 +193,7 @@ const updateCart = async function (req, res) {
 
         let findQuantity = cart.items.find(x => x.productId.toString() === productId)
         
-        if (removeProduct === 0) {
+        if (removeProduct ==0) {
 
             let totalAmount = cart.totalPrice - (product.price * findQuantity.quantity) // substract the amount of product*quantity
 
