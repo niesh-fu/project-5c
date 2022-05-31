@@ -14,6 +14,7 @@ const createCart = async function (req, res) {
         let userId = req.params.userId
         let userIdFromToken = req.userId
 
+
         //----------------Validation Starts-------------------------------------//
 
         if (!isValidRequestBody(requestBody)) {
@@ -39,7 +40,6 @@ const createCart = async function (req, res) {
             res.status(401).send({ status: false, message: `Unauthorized access! Owner info doesn't match` });
             return
         }
-        let cart = await cartModel.findOne({ userId: userId })
 
         // Extract body
         let { productId, quantity } = requestBody
@@ -47,6 +47,7 @@ const createCart = async function (req, res) {
         if (!isValidObjectId(productId)) {
             return res.status(400).send({ status: false, message: "Invalid productId provided" })
         }
+
         let product = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!product) {
             return res.status(400).send({ status: false, message: `No such product present ,unable to add product ${productId} to cart.` })
@@ -107,7 +108,6 @@ const createCart = async function (req, res) {
 
 
         }
-
         // TODO----------------------------create new cart
 
         let priceSum = product.price * quantity
@@ -142,8 +142,6 @@ const updateCart = async function (req, res) {
         if (!isValidObjectId(userId)) {
             return res.status(400).send({ status: false, message: "Invalid userId in body" })
         }
-
-
 
         let user = await userModel.findOne({ _id: userId })
         if (!user) {
@@ -201,7 +199,7 @@ const updateCart = async function (req, res) {
 
             let totalAmount = cart.totalPrice - (product.price * findQuantity.quantity) // substract the amount of product*quantity
 
-            await cartModel.findOneAndUpdate({ _id: cartId }, { $pull: { items: { productId: productId } } }, { new: true })   //pull the product from itmes  //https://stackoverflow.com/questions/15641492/mongodb-remove-object-from-array
+            await cartModel.findOneAndUpdate({ _id: cartId }, { $pull: { items: { productId: productId } } }, { new: true })   //pull the product from itmes 
 
             let quantity = cart.totalItems - 1
             let data = await cartModel.findOneAndUpdate({ _id: cartId }, { $set: { totalPrice: totalAmount, totalItems: quantity } }, { new: true })   //update the cart with total items and totalprice
