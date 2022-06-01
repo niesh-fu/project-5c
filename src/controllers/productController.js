@@ -216,14 +216,9 @@ const updateProduct = async function (req, res) {
 
         const requestBody = JSON.parse(JSON.stringify(req.body));
         const productId = req.params.productId;
-        
 
         if (!isValidObjectId(productId)) {
             return res.status(400).send({ status: false, message: "Invalid productId in params." })
-        }
-
-        if (!isValidRequestBody(requestBody)) {
-            return res.status(400).send({ status: false, message: 'No paramateres passed product unmodified' })
         }
 
         const product = await productModel.findOne({ _id: productId, isDeleted: false })
@@ -231,9 +226,15 @@ const updateProduct = async function (req, res) {
             return res.status(404).send({ status: false, message: 'Product is not found' })
         }
 
-        const { title, description, price, currencyId, isFreeShipping, style, availableSizes, installments } = requestBody;
-
         let updatedProductData = {};
+
+        const files = req.files;
+        // if there is any file it will be update
+        if (files && files.length > 0) {
+            updatedProductData["productImage"] = await uploadFile(files[0]);
+        }
+
+        const { title, description, price, currencyId, isFreeShipping, style, availableSizes, installments } = requestBody;
 
         if (requestBody.hasOwnProperty('title')) {
             if (!isValid(title)) {
@@ -312,16 +313,16 @@ const updateProduct = async function (req, res) {
                 }
             }
 
+            
             updatedProductData['availableSizes'] = AVAILABLE_SIZES
         }
+  
 
-        const files = req.files;
-        if ((files && files.length > 0)) {   //Undefined.length will not work in JS
-            const productImage = await uploadFile(files[0]);
-            updatedProductData['productImage'] = productImage
+        if(!isValidRequestBody(updatedProductData)){
+            return res.status(400).send({ status: false, message: "please provide product Details or product image" })
         }
 
-
+    
         const updatedProduct = await productModel.findOneAndUpdate({ _id: productId }, updatedProductData, { new: true })
         res.status(200).send({ status: true, message: 'Successfully updated', data: updatedProduct });
 

@@ -159,7 +159,7 @@ const loginUser = async function (req, res) {
 
         // Sending token in response header
         res.setHeader('Authorization', 'Bearer ' + token);
-        res.status(201).send({ status: true, msg: "successful login", data: { userId: user._id, token: token } });
+        res.status(200).send({ status: true, msg: "successful login", data: { userId: user._id, token: token } });
 
     } catch (error) {
         res.status(500).send({ status: false, msg: error.message });
@@ -218,10 +218,6 @@ const updateUserProfile = async function (req, res) {
         // user details (to be updated) sent through request body
         const bodyFromReq = JSON.parse(JSON.stringify(req.body));
 
-        // if request body is empty
-        if (!isValidRequestBody(bodyFromReq)) {
-            return res.status(400).send({ status: false, message: "Please provide user details to update!" });
-        }
         // declaring a new emapty object to holds the all values in it
         let upadteFields = {};
 
@@ -374,6 +370,10 @@ const updateUserProfile = async function (req, res) {
                 }
             }
 
+        }
+
+        if(!isValidRequestBody(upadteFields)){
+            return res.status(400).send({ status: false, message: "please provide user Details or user profile" })
         }
 
         //--------------------------------------Validation Ends----------------------------------//
