@@ -6,15 +6,19 @@ const authentication = async function (req, res, next) {
     try {
         // token sent in request header 'authorization'
         let tokenWithBearer = req.headers["authorization"];
+
+          // if token is not provided
+          if (!tokenWithBearer) {
+            return res.status(400).send({ status: false, msg: "Token required! Please login to generate token" });
+          }
         //split values if there is any space between & saved as array form  
         let tokenArray = tokenWithBearer.split(" ");
         //accessing the 2nd postion element by using index[1]
         let token = tokenArray[1];
+       // console.log(token)
 
-        // if token is not provided
-        if (!token) {
-            return res.status(400).send({ status: false, msg: "Token required! Please login to generate token" });
-        }
+      
+        
 
         jwt.verify(token, "Group-33", { ignoreExpiration: true }, function (error, decodedToken) {
             // if token is not valid
