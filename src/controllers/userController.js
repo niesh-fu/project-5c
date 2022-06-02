@@ -100,7 +100,7 @@ const registerUser = async function (req, res) {
 
         //if request files array is empty
         if (!(files && files.length > 0)) {
-            return res.status(400).send({ status: false, message: "Profile image is required in files" });
+            return res.status(400).send({ status: false, message: "Profile image is required" });
         }
 
         //--------------------------------------Validation Ends----------------------------------//
@@ -237,7 +237,7 @@ const updateUserProfile = async function (req, res) {
         if (bodyFromReq.hasOwnProperty("fname")) {
             // if fname is empty
             if (!isValid(fname) || !isValidName(fname)) {
-                return res.status(400).send({ status: false, message: "fname should contain only alphabets" })
+                return res.status(400).send({ status: false, message: "please provide fname and it should contain only alphabets" })
             }
 
             upadteFields["fname"] = fname;
@@ -247,7 +247,7 @@ const updateUserProfile = async function (req, res) {
         if (bodyFromReq.hasOwnProperty("lname")) {
             // if lname is empty
             if (!isValid(lname) || !isValidName(lname)) {
-                return res.status(400).send({ status: false, message: "lname should contain only alphabets" })
+                return res.status(400).send({ status: false, message: "please provide lname and it should contain only alphabets" })
             }
 
             upadteFields["lname"] = lname;
@@ -257,13 +257,13 @@ const updateUserProfile = async function (req, res) {
         if (bodyFromReq.hasOwnProperty("email")) {
             // if email is empty
             if (!isValid(email) || !isValidEmail(email)) {
-                return res.status(400).send({ status: false, message: "email should be a valid email" });
+                return res.status(400).send({ status: false, message: "please provide email and it be a valid email" });
             }
 
             // Checking E-mail for Uniqueness
             const isEmailAlreadyPresent = await userModel.findOne({ email: email })
             if (isEmailAlreadyPresent) {
-                return res.status(400).send({ status: false, message: "Email already present!" });
+                return res.status(400).send({ status: false, message: `${email} is already present!` });
             }
 
             upadteFields["email"] = email;
@@ -273,13 +273,13 @@ const updateUserProfile = async function (req, res) {
         if (bodyFromReq.hasOwnProperty("phone")) {
             // Indian type phone number validation
             if (!isValid(phone) || !isValidPhone(phone)) {
-                return res.status(400).send({ status: false, message: "phone should be a valid indian phone number" });
+                return res.status(400).send({ status: false, message: "please provide phone and it be a valid indian phone number" });
             }
 
             // Checking phone number for uniqueness
             const isPhoneAlreadyPresent = await userModel.findOne({ phone: phone })
             if (isPhoneAlreadyPresent) {
-                return res.status(400).send({ status: false, message: "Phone number already present!" });
+                return res.status(400).send({ status: false, message: Phone `${phone} is already present!` });
             }
 
             upadteFields["phone"] = phone;
@@ -289,13 +289,13 @@ const updateUserProfile = async function (req, res) {
         if (bodyFromReq.hasOwnProperty("password")) {
             // Checking the length of password
             if (!isValid(password) || !isValidPassword(password)) {
-                return res.status(400).send({ status: false, message: "password should be Valid min 8 and max 15" })
+                return res.status(400).send({ status: false, message: "please provide password and it be Valid min 8 and max 15" })
             }
 
             // if old password is same as new password
             const isSamePassword = await bcrypt.compare(password, isUserPresent.password);
             if (isSamePassword) {
-                return res.status(400).send({ status: false, message: "password is same as old password" })
+                return res.status(400).send({ status: false, message: "entered password is same as old password" })
             }
 
             //Encrypting Password by Bcrypt package
@@ -316,7 +316,7 @@ const updateUserProfile = async function (req, res) {
                 // shipping address validation
                 if (shipping.hasOwnProperty('street')) {
                     if (!isValid(street)) {
-                        return res.status(400).send({ status: false, message: "street is not valid in shipping" });
+                        return res.status(400).send({ status: false, message: "please provide street and it should be valid - shipping" });
                     }
 
                     upadteFields["address.shipping.street"] = street;
@@ -324,7 +324,7 @@ const updateUserProfile = async function (req, res) {
 
                 if (shipping.hasOwnProperty('city')) {
                     if (!isValid(city)) {
-                        return res.status(400).send({ status: false, message: "city is not valid in shipping" });
+                        return res.status(400).send({ status: false, message: "please provide city and it should be valid - shipping" });
                     }
 
                     upadteFields["address.shipping.city"] = city;
@@ -332,7 +332,7 @@ const updateUserProfile = async function (req, res) {
 
                 if (shipping.hasOwnProperty('pincode')) {
                     if (!isValidPincode(pincode)) {
-                        return res.status(400).send({ status: false, message: "please use a valid pincode in shipping address!" });
+                        return res.status(400).send({ status: false, message: "please provide pincode and it should be valid - shipping" });
                     }
 
                     upadteFields["address.shipping.pincode"] = pincode;
@@ -347,7 +347,7 @@ const updateUserProfile = async function (req, res) {
                 // shipping address validation
                 if (billing.hasOwnProperty('street')) {
                     if (!isValid(street)) {
-                        return res.status(400).send({ status: false, message: "street is not valid in billing" });
+                        return res.status(400).send({ status: false, message: "please provide street and it should be valid - billing" });
                     }
 
                     upadteFields["address.billing.street"] = street;
@@ -355,7 +355,7 @@ const updateUserProfile = async function (req, res) {
 
                 if (billing.hasOwnProperty('city')) {
                     if (!isValid(city)) {
-                        return res.status(400).send({ status: false, message: "city is not valid in billing" });
+                        return res.status(400).send({ status: false, message: "please provide street and it should be valid - billing" });
                     }
 
                     upadteFields["address.billing.city"] = city;
@@ -363,7 +363,7 @@ const updateUserProfile = async function (req, res) {
 
                 if (billing.hasOwnProperty('pincode')) {
                     if (!isValidPincode(pincode)) {
-                        return res.status(400).send({ status: false, message: "please use a valid pincode in billing address!" });
+                        return res.status(400).send({ status: false, message: "please provide pincode and it should be valid - billing" });
                     }
 
                     upadteFields["address.billing.pincode"] = pincode;

@@ -126,7 +126,7 @@ const getProductByFilter = async function (req, res) {
         if (query.hasOwnProperty('name')) {
 
             if (!isValid(name)) {
-                return res.status(400).send({ status: false, message: "Name is not valid" });
+                return res.status(400).send({ status: false, message: "name value is not valid" });
             }
 
             filters["title"] = { $regex: name, $options: "i" };
@@ -223,7 +223,7 @@ const updateProduct = async function (req, res) {
 
         const product = await productModel.findOne({ _id: productId, isDeleted: false })
         if (!product) {
-            return res.status(404).send({ status: false, message: 'Product is not found' })
+            return res.status(404).send({ status: false, message: 'Product not found' })
         }
 
         let updatedProductData = {};
@@ -243,7 +243,7 @@ const updateProduct = async function (req, res) {
 
             const isTitleAlreadyUsed = await productModel.findOne({ title: title });
             if (isTitleAlreadyUsed) {
-                return res.status(400).send({ status: false, message: `${title} title is already used` })
+                return res.status(400).send({ status: false, message: `${title} title is already present` })
             }
             updatedProductData['title'] = title;
         }
